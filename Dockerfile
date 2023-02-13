@@ -1,4 +1,4 @@
-FROM sapmachine:17 AS builder
+FROM sapmachine:17
 
 ADD ./gradle /tmp-build/gradle/
 ADD ./src /tmp-build/src/
