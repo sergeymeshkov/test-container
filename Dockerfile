@@ -1,5 +1,6 @@
 FROM sapmachine:17
 
+
 ADD ./gradle /tmp-build/gradle/
 ADD ./src /tmp-build/src/
 ADD ./build.gradle /tmp-build/build.gradle
