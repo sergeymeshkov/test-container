@@ -1,8 +1,20 @@
+import org.testcontainers.containers.PostgreSQLContainer
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.testcontainers:postgresql:1.17.6"
+    }
+}
+
 plugins {
     id 'java-library'
     id 'org.springframework.boot' version '3.0.2'
     id 'io.spring.dependency-management' version '1.1.0'
     id 'nu.studer.jooq' version '8.1'
+    id "org.liquibase.gradle" version "2.1.1"
 }
 
 group = 'com.example'
@@ -10,8 +22,9 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
 ext {
-	set('testcontainersVersion', "1.17.6")
-	set('jooqVersion', "3.17.7")
+    set('testcontainersVersion', "1.17.6")
+    set('jooqVersion', "3.17.7")
+    set('picocliVersion', "4.7.1")
 }
 
 configurations {
@@ -20,20 +33,45 @@ configurations {
     }
 }
 
+task db {
+    var instance = new PostgreSQLContainer("postgres:15")
+            .withDatabaseName("public")
+    instance.start()
+    db.ext.jdbcUrl = instance.getJdbcUrl()
+    db.ext.username = instance.getUsername()
+    db.ext.password = instance.getPassword()
+    db.ext.schema = instance.getDatabaseName()
+    db.ext.instance = instance
+}
+
+liquibase {
+    activities {
+        main {
+            changeLogFile 'db/changelog/db.changelog-master.xml'
+            classpath "${projectDir}/src/main/resources"
+            url db.jdbcUrl
+            username db.username
+            password db.password
+        }
+    }
+}
+
 jooq {
-    version = '3.17.7'
+    version = rootProject.ext.jooqVersion
     configurations {
         main {
             generationTool {
+                jdbc {
+                    driver = 'org.postgresql.Driver'
+                    url = db.jdbcUrl
+                    user = db.username
+                    password = db.password
+                }
                 generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
                     database {
-                        name = 'org.jooq.meta.extensions.liquibase.LiquibaseDatabase'
-                        properties {
-                            property {
-                                key = 'scripts'
-                                value = 'db/changelog/db.changelog-master.xml'
-                            }
-                        }
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        inputSchema = db.schema
                     }
                 }
             }
@@ -46,24 +84,34 @@ repositories {
 }
 
 dependencies {
+    jooqGenerator("org.postgresql:postgresql")
+    liquibaseRuntime("org.liquibase:liquibase-core")
+    liquibaseRuntime("org.postgresql:postgresql")
+    liquibaseRuntime("info.picocli:picocli:${picocliVersion}")
+
     implementation 'org.springframework.boot:spring-boot-starter-jooq'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.liquibase:liquibase-core'
 
-    compileOnly "org.jooq:jooq-meta-extensions-liquibase:${jooqVersion}"
     compileOnly 'org.projectlombok:lombok'
 
     runtimeOnly 'org.postgresql:postgresql'
 
     annotationProcessor 'org.projectlombok:lombok'
 
-    jooqGenerator("org.jooq:jooq-meta-extensions-liquibase")
-    jooqGenerator(files("src/main/resources"))
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+}
+
+tasks.named('generateJooq').configure {
+    dependsOn tasks.named('db') //testContainer
+    dependsOn tasks.named('update') //liquibase
+
+    doLast {
+        db.instance.stop()
+    }
 }
 
 dependencyManagement {
