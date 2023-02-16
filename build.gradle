@@ -106,7 +106,7 @@ dependencies {
 }
 
 tasks.named('generateJooq').configure {
-    dependsOn tasks.named('db') //testContainer
+    dependsOn tasks.named('db') //test db container
     dependsOn tasks.named('update') //liquibase
 
     doLast {
