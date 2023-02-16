@@ -3,7 +3,7 @@ steps:
     name: docker/compose
     args: [ '-f', 'docker-compose.yml', 'up', '-d', 'dind-service' ]
   - id: 'Check service is listening'
-    name: gcr.io/cloud-builders/curl
+    name: 'gcr.io/cloud-builders/curl'
     args: [ "dind-service:2375" ]
     waitFor: [ 'Start dind' ]
   - name: 'gcr.io/cloud-builders/docker'
