@@ -6,7 +6,8 @@ services:
     ports:
       - "127.0.0.1:2375:2375"
       - "127.0.0.1:2376:2376"
-    network_mode: cloudbuild
+    networks:
+      - cloudbuild
 networks:
   cloudbuild:
       external: true
