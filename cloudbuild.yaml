@@ -11,4 +11,3 @@ steps:
     args: ['build', '--network=cloudbuild', '-t', 'gcr.io/$PROJECT_ID/test-container', '.']
     env:
       - 'DOCKER_HOST=tcp://dind-service:2375'
-    images: ['gcr.io/$PROJECT_ID/test-container']
