@@ -4,5 +4,5 @@ steps:
     args: [ '-f', 'docker-compose.yml', 'up', '-d', 'dind-service' ]
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build Image'
-    args: ['build', '-t', '--network=cloudbuild', 'gcr.io/$PROJECT_ID/test-container', '.']
+    args: ['build', '--network=cloudbuild', '-t', 'gcr.io/$PROJECT_ID/test-container', '.']
 images: ['gcr.io/$PROJECT_ID/test-container']
