@@ -2,9 +2,11 @@ steps:
   - id: start-dind
     name: docker/compose
     args: [ '-f', 'docker-compose.yml', 'up', '-d', 'dind-service' ]
+  - id: 'Check service is listening'
+    name: gcr.io/cloud-builders/curl
+    args: [ "dind-service:2375" ]
+    waitFor: [ start-dind ]
   - name: 'gcr.io/cloud-builders/docker'
-    waitFor:
-      - 'start-dind'
     id: 'Build Image'
     args: ['build', '--network=cloudbuild', '-t', 'gcr.io/$PROJECT_ID/test-container', '.']
     env:
