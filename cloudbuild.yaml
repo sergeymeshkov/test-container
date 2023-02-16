@@ -1,4 +1,7 @@
 steps:
+  - id: start-dind
+    name: docker/compose
+    args: [ '-f', 'docker-compose.yml', 'up', '-d', 'dind-service' ]
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build Image'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/test-container', '.']
