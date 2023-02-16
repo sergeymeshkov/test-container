@@ -1,5 +1,5 @@
 steps:
-  - id: start-dind
+  - id: 'Start dind'
     name: docker/compose
     args: [ '-f', 'docker-compose.yml', 'up', '-d', 'dind-service' ]
   - id: 'Check service is listening'
