@@ -1,7 +1,7 @@
 steps:
   - id: 'Start dind'
     name: docker/compose
-    args: [ '-f', 'docker-compose.yml', 'up', '-d', 'dind-service' ]
+    args: ['up', '-d' ]
   - id: 'Wait for dind'
     name: 'ubuntu'
     args: [ 'sleep', '200' ]
